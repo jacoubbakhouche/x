@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:glassmorphism/glassmorphism.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../chat/screens/chat_screen.dart';
 
 class LandingScreen extends StatelessWidget {
@@ -10,72 +9,53 @@ class LandingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
+      backgroundColor: const Color(0xFFF5F6F8),
+      body: Row(
         children: [
-          // Background
-           Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF1E1E2E), Color(0xFF2A2D46)],
-              ),
-            ),
-          ),
+          // Sidebar
+          _buildMinimalSidebar(),
           
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
+          // Main Content
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 40),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header
-                  _buildHeader(),
-                  const SizedBox(height: 32),
+                  _buildTopNav(),
+                  const SizedBox(height: 80),
                   
-                  // Main Dashboard Grid
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Left Column: 3D Body & Schedule
-                              Expanded(
-                                flex: 3,
-                                child: Column(
-                                  children: [
-                                    _buildAnatomyCard(),
-                                    const SizedBox(height: 20),
-                                    _buildScheduleCard(),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 20),
-                              
-                              // Right Column: Stats & AI Action
-                              Expanded(
-                                flex: 2,
-                                child: Column(
-                                  children: [
-                                     _buildStatCard("Heart Rate", "80-90 bpm", Icons.favorite, Colors.redAccent),
-                                     const SizedBox(height: 20),
-                                     _buildStatCard("Brain Activity", "90-150 Hz", Icons.waves, Colors.orangeAccent),
-                                     const SizedBox(height: 20),
-                                     _buildAIActionCard(context),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          // Online Consultation Doctors
-                          _buildDoctorsSection(),
-                        ],
-                      ),
+                  // Welcome Text
+                  RichText(
+                    text: const TextSpan(
+                      style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.black),
+                      children: [
+                        TextSpan(text: "Hi there, "),
+                        TextSpan(
+                          text: "Doctor", 
+                          style: TextStyle(color: Color(0xFF6C63FF))
+                        ),
+                      ]
                     ),
                   ),
+                  const Text(
+                    "What would you like to check today?",
+                    style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Color(0xFF6C63FF)),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "Use our AI assistant to verify clinical guidelines or manage your practice.",
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 50),
+                  
+                  // Auth Section
+                  _buildAuthSection(context),
+                  
+                  const SizedBox(height: 60),
+                  
+                  // Dashboard Grid
+                  _buildDashboardGrid(context),
                 ],
               ),
             ),
@@ -85,230 +65,206 @@ class LandingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildMinimalSidebar() {
+    return Container(
+      width: 80,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(right: BorderSide(color: Colors.black.withOpacity(0.05))),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 40),
+          const Icon(Icons.auto_awesome_mosaic, color: Color(0xFF6C63FF), size: 32),
+          const SizedBox(height: 60),
+          _sidebarIcon(Icons.add, active: false),
+          _sidebarIcon(Icons.search),
+          _sidebarIcon(Icons.home, active: true),
+          _sidebarIcon(Icons.folder_open),
+          _sidebarIcon(Icons.history),
+          const Spacer(),
+          _sidebarIcon(Icons.settings),
+          const CircleAvatar(
+            radius: 18,
+            backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=11"),
+          ),
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+
+  Widget _sidebarIcon(IconData icon, {bool active = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Icon(
+        icon, 
+        color: active ? const Color(0xFF6C63FF) : Colors.black45,
+        size: 26,
+      ),
+    );
+  }
+
+  Widget _buildTopNav() {
     return Row(
       children: [
-        CircleAvatar(
-          radius: 24,
-          backgroundColor: const Color(0xFF6C63FF).withOpacity(0.2),
-          child: const Icon(Icons.medical_services, color: Color(0xFF6C63FF)),
-        ),
-        const SizedBox(width: 12),
-        const Text(
-          "HealthLink", 
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)
-        ),
+        const Text("HealthLink AI", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
         const Spacer(),
-        _headerButton(Icons.dashboard, "Dashboard", active: true),
-        const SizedBox(width: 16),
-        _headerButton(Icons.calendar_today, "Appointments"),
-        const SizedBox(width: 16),
-        const CircleAvatar(
-          radius: 20,
-           backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=11"),
-        )
+        _navItem("Dashboard", active: true),
+        _navItem("Schedule"),
+        _navItem("Patients"),
       ],
     );
   }
 
-  Widget _headerButton(IconData icon, String label, {bool active = false}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: active ? const Color(0xFF6C63FF) : Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: Colors.white),
-          const SizedBox(width: 8),
-          Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAnatomyCard() {
-    return GlassmorphicContainer(
-       width: double.infinity,
-       height: 350,
-       borderRadius: 24,
-       blur: 20,
-       alignment: Alignment.center,
-       border: 1,
-       linearGradient: LinearGradient(colors: [Colors.white.withOpacity(0.1), Colors.white.withOpacity(0.05)]),
-       borderGradient: LinearGradient(colors: [Colors.white.withOpacity(0.2), Colors.white.withOpacity(0.1)]),
-       child: Stack(
-         children: [
-           Positioned(
-             top: 20, left: 20,
-             child: Column(
-               crossAxisAlignment: CrossAxisAlignment.start,
-               children: const [
-                 Text("Hi Doctor!", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white)),
-                 Text("Patient Overview", style: TextStyle(fontSize: 16, color: Colors.grey)),
-               ],
-             ),
-           ),
-           // Placeholder for 3D body image
-           Align(
-             alignment: Alignment.bottomRight,
-             child: Opacity(
-               opacity: 0.8,
-               child: Image.network(
-                 "https://ouch-cdn2.icons8.com/6U4g0X4Z3w8k0Z5Y0d1c8f4h5j2k9l3m7n6o0p4q2r5s.png", // Creative commons medical illustration
-                 height: 300,
-                 errorBuilder: (ctx, err, stack) => const Icon(Icons.person, size: 200, color: Colors.white10),
-               ),
-             ),
-           )
-         ],
-       ),
-    );
-  }
-
-  Widget _buildScheduleCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2D2F45),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text("Care Schedule", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(12)),
-                child: const Text("Sep 2026", style: TextStyle(color: Colors.white)),
-              )
-            ],
-          ),
-          const SizedBox(height: 20),
-          _scheduleItem("12:00", "Blood Pressure Check", "Measure BP at rest", Colors.blueAccent),
-          _scheduleItem("14:00", "Dr. John Consultation", "Prepare 3 BP readings", Colors.purpleAccent),
-        ],
-      ),
-    );
-  }
-
-  Widget _scheduleItem(String time, String title, String subtitle, Color color) {
+  Widget _navItem(String label, {bool active = false}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Row(
-        children: [
-          Text(time, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
-                border: Border(left: BorderSide(color: color, width: 4)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  Text(subtitle, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                ],
-              ),
-            ),
-          )
-        ],
+      padding: const EdgeInsets.only(left: 32),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: active ? Colors.black : Colors.black45,
+          fontWeight: active ? FontWeight.bold : FontWeight.normal
+        ),
       ),
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildAuthSection(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(color: const Color(0xFF2D2F45), borderRadius: BorderRadius.circular(24)),
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 20, offset: const Offset(0, 10))
+        ],
+      ),
       child: Row(
         children: [
-          CircleAvatar(backgroundColor: color.withOpacity(0.2), child: Icon(icon, color: color)),
-          const SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(color: Colors.grey)),
-              Text(value, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+            children: const [
+              Text("Get Started", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Text("Sign in to save your consultations", style: TextStyle(color: Colors.grey)),
             ],
-          )
+          ),
+          const Spacer(),
+          _authButton(
+            icon: FontAwesomeIcons.google, 
+            label: "Continue with Google", 
+            onPressed: () {},
+            color: Colors.white,
+            textColor: Colors.black,
+            border: true,
+          ),
+          const SizedBox(width: 16),
+          _authButton(
+            icon: Icons.email_outlined, 
+            label: "Sign up with Email", 
+            onPressed: () {},
+            color: const Color(0xFF6C63FF),
+            textColor: Colors.white,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildAIActionCard(BuildContext context) {
+  Widget _authButton({
+    required IconData icon, 
+    required String label, 
+    required VoidCallback onPressed,
+    required Color color,
+    required Color textColor,
+    bool border = false,
+  }) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: FaIcon(icon, size: 18, color: textColor),
+      label: Text(label),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: textColor,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: border ? BorderSide(color: Colors.black.withOpacity(0.1)) : BorderSide.none,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDashboardGrid(BuildContext context) {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 3,
+      childAspectRatio: 1.5,
+      crossAxisSpacing: 24,
+      mainAxisSpacing: 24,
+      children: [
+        _buildActionCard(
+          context,
+          "Start AI Consultation",
+          "Analyze symptoms with guidelines",
+          Icons.auto_awesome,
+          const Color(0xFF6C63FF),
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatScreen())),
+        ),
+        _buildActionCard(
+          context,
+          "Patient History",
+          "View previous consultations",
+          Icons.history,
+          Colors.orangeAccent,
+        ),
+        _buildActionCard(
+          context,
+          "Clinical Guidelines",
+          "Browse R1-R14 medical rules",
+          Icons.menu_book,
+          Colors.blueAccent,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionCard(
+    BuildContext context, 
+    String title, 
+    String subtitle, 
+    IconData icon, 
+    Color color,
+    {VoidCallback? onTap}
+  ) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatScreen()));
-      },
-      child: Container(
-        height: 180,
-        width: double.infinity,
+      onTap: onTap,
+	  child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [Color(0xFF6C63FF), Color(0xFF4C43CD)]),
-          borderRadius: BorderRadius.circular(24),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(32),
+          border: Border.all(color: Colors.black.withOpacity(0.01)),
           boxShadow: [
-            BoxShadow(color: const Color(0xFF6C63FF).withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 5))
-          ]
+            BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 20, offset: const Offset(0, 10))
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-             Icon(Icons.auto_awesome, color: Colors.white, size: 32),
-             SizedBox(height: 16),
-             Text("Start AI Consultation", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-             SizedBox(height: 8),
-             Text("Analyze symptoms with guidelines", style: TextStyle(color: Colors.white70)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDoctorsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text("Online Consultation", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 16),
-        Row(
           children: [
-            _doctorCard("Dr. Sarah", "Cardiologist", "https://i.pravatar.cc/150?img=5"),
-            const SizedBox(width: 16),
-            _doctorCard("Dr. Mike", "Dentist", "https://i.pravatar.cc/150?img=3"),
-          ],
-        )
-      ],
-    );
-  }
-
-  Widget _doctorCard(String name, String role, String image) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: const Color(0xFF2D2F45), borderRadius: BorderRadius.circular(20)),
-        child: Row(
-          children: [
-             CircleAvatar(backgroundImage: NetworkImage(image)),
-             const SizedBox(width: 12),
-             Column(
-               crossAxisAlignment: CrossAxisAlignment.start,
-               children: [
-                 Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                 Text(role, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-               ],
-             )
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(16)),
+              child: Icon(icon, color: color),
+            ),
+            const SizedBox(height: 20),
+            Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text(subtitle, style: const TextStyle(color: Colors.grey, fontSize: 14)),
           ],
         ),
       ),

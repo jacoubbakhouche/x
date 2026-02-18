@@ -1,17 +1,22 @@
-# health_decision_app
+# HealthLink AI Consultation
 
-A new Flutter project.
+A modern Flutter web application designed for healthcare professionals.
 
-## Getting Started
+## Features
+- **AI Consultation**: Intelligent medical assistant using Groq AI (Llama 3).
+- **Clinical Guidelines**: Strictly follows JSON-based medical rules.
+- **Modern Dashboard**: Dark theme with glassmorphism effects.
+- **Supabase Backend**: Secure data storage and Edge Functions.
 
-This project is a starting point for a Flutter application.
+## Setup
+1. Clone the repository.
+2. Create a `.env` file with:
+   ```
+   SUPABASE_URL=your_url
+   SUPABASE_ANON_KEY=your_key
+   ```
+3. Run `flutter pub get`.
+4. Run `flutter run -d chrome`.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Deployment
+This app is ready for Vercel deployment. Ensure you add the `.env` variables in Vercel settings.

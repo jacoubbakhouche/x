@@ -2,45 +2,56 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static ThemeData get darkTheme {
+  static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: const Color(0xFF1E1E2E), // Deep dark blue/purple
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: const Color(0xFFF9F9F9), // Very light grey
       colorScheme: ColorScheme.fromSeed(
         seedColor: const Color(0xFF6C63FF),
-        brightness: Brightness.dark,
+        brightness: Brightness.light,
         primary: const Color(0xFF6C63FF),
-        secondary: const Color(0xFFFF6584),
-        surface: const Color(0xFF27293D),
-        error: const Color(0xFFFF6584),
+        secondary: const Color(0xFFAC6BFF),
+        surface: Colors.white,
+        onSurface: const Color(0xFF1A1A1A),
       ),
-      textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme).apply(
-        bodyColor: Colors.white,
-        displayColor: Colors.white,
+      textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme).apply(
+        bodyColor: const Color(0xFF1A1A1A),
+        displayColor: const Color(0xFF1A1A1A),
       ),
       appBarTheme: const AppBarTheme(
         centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: Color(0xFF1A1A1A)),
         titleTextStyle: TextStyle(
-          color: Colors.white,
+          color: Color(0xFF1A1A1A),
           fontSize: 24,
           fontWeight: FontWeight.bold,
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF2D2F45),
-        hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+        fillColor: Colors.white,
+        hintStyle: TextStyle(color: Colors.black.withOpacity(0.4)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: const BorderSide(color: Color(0xFF6C63FF), width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       ),
     );
   }
+
+  // Fallback dark theme or alias for now
+  static ThemeData get darkTheme => lightTheme; 
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:glassmorphism/glassmorphism.dart';
 import '../logic/chat_controller.dart';
 import '../models/chat_message.dart';
 
@@ -44,83 +43,52 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     });
 
     return Scaffold(
-      body: Stack(
+      backgroundColor: const Color(0xFFF5F6F8),
+      body: Row(
         children: [
-          // Background Gradient
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF2E2A4F), Color(0xFF1B1B2F)],
-              ),
-            ),
-          ),
+          // Left Workspace Sidebar
+          _buildSidebar(context),
           
-          SafeArea(
-            child: Row(
-              children: [
-                // Sidebar (Simulated for Web aesthetics)
-                if (MediaQuery.of(context).size.width > 800)
-                  _buildSidebar(context),
-
-                // Main Chat Area
-                Expanded(
-                  child: Column(
-                    children: [
-                      // Header
-                      Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Row(
-                          children: [
-                            const Text(
-                              'AI Consultation',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const Spacer(),
-                            IconButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(); // Go back to landing
-                              }, 
-                              icon: const CircleAvatar(
-                                backgroundColor: Color(0xFF6C63FF),
-                                child: Icon(Icons.home, color: Colors.white),
-                              )
-                            )
-                          ],
+          // Main Chat Area
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(40),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 40, offset: const Offset(0, 20))
+                ],
+              ),
+              child: Column(
+                children: [
+                  // App Bar / Header
+                  _buildHeader(context),
+                  
+                  // Messages or Empty State
+                  Expanded(
+                    child: messages.isEmpty 
+                      ? _buildEmptyState() 
+                      : ListView.builder(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.all(32),
+                          itemCount: messages.length + (chatState.isLoading ? 1 : 0),
+                          itemBuilder: (context, index) {
+                             if (index == messages.length) {
+                               return const Padding(
+                                 padding: EdgeInsets.all(16.0),
+                                 child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                               );
+                             }
+                             return _buildMessageBubble(messages[index]);
+                          },
                         ),
-                      ),
-                      
-                      // Messages
-                      Expanded(
-                        child: messages.isEmpty
-                            ? _buildEmptyState()
-                            : ListView.builder(
-                                controller: _scrollController,
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                                itemCount: messages.length + (chatState.isLoading ? 1 : 0),
-                                itemBuilder: (context, index) {
-                                  if (index == messages.length) {
-                                    return const Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(16.0),
-                                        child: CircularProgressIndicator(color: Color(0xFF6C63FF)),
-                                      ),
-                                    );
-                                  }
-                                  return _buildMessageBubble(messages[index]);
-                                },
-                              ),
-                      ),
-                      _buildInputArea(ref),
-                    ],
                   ),
-                ),
-              ],
+
+                  // Input Area
+                  _buildInputArea(ref),
+                ],
+              ),
             ),
           ),
         ],
@@ -130,65 +98,118 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   Widget _buildSidebar(BuildContext context) {
     return Container(
-      width: 250,
-      color: Colors.black.withOpacity(0.2),
-      padding: const EdgeInsets.all(20),
+      width: 80,
+      padding: const EdgeInsets.symmetric(vertical: 40),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("History", style: TextStyle(color: Colors.grey, fontSize: 14)),
-          const SizedBox(height: 20),
-          _sidebarItem("Patient consultation #1"),
-          _sidebarItem("Antibiotic rules"),
+          const Icon(Icons.auto_awesome_mosaic, color: Color(0xFF6C63FF), size: 32),
+          const SizedBox(height: 48),
+          _sidebarIcon(Icons.add_circle_outline),
+          _sidebarIcon(Icons.search),
+          _sidebarIcon(Icons.home, active: true, onTap: () => Navigator.pop(context)),
+          _sidebarIcon(Icons.folder_outlined),
+          _sidebarIcon(Icons.history),
+          const Spacer(),
+          _sidebarIcon(Icons.settings_outlined),
+          const CircleAvatar(
+            radius: 18,
+            backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=11"),
+          ),
         ],
       ),
     );
   }
 
-  Widget _sidebarItem(String title) {
+  Widget _sidebarIcon(IconData icon, {bool active = false, VoidCallback? onTap}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Text(title, style: const TextStyle(color: Colors.white70)),
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: InkWell(
+        onTap: onTap,
+        child: Icon(icon, color: active ? const Color(0xFF6C63FF) : Colors.black38, size: 28),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 32),
+      child: Row(
+        children: [
+          const Text(
+            "AI Consultation", 
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)
+          ),
+          const Spacer(),
+          IconButton(
+            icon: const Icon(Icons.more_horiz, color: Colors.black45),
+            onPressed: () {},
+          )
+        ],
+      ),
     );
   }
 
   Widget _buildEmptyState() {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          _suggestionCard("Check antibiotic dosage for pediatric patient"),
+          RichText(
+            textAlign: TextAlign.center,
+            text: const TextSpan(
+              style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold, color: Colors.black),
+              children: [
+                TextSpan(text: "Hi there, "),
+                TextSpan(text: "Doctor\n", style: TextStyle(color: Color(0xFF6C63FF))),
+                TextSpan(text: "What would like to know?"),
+              ]
+            ),
+          ),
           const SizedBox(height: 16),
-          _suggestionCard("Analyze symptoms for potential abscess"),
+          const Text(
+            "Use one of the most common prompts below or use your own to begin",
+            style: TextStyle(color: Colors.black38, fontSize: 16),
+          ),
+          const SizedBox(height: 48),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Wrap(
+              spacing: 20,
+              runSpacing: 20,
+              alignment: WrapAlignment.center,
+              children: [
+                _suggestionCard("Check antibiotic dosage for pediatric patient", Icons.person_outline),
+                _suggestionCard("Analyze symptoms for potential abscess", Icons.medical_services_outlined),
+                _suggestionCard("Pulpite guidelines for antibiotics", Icons.question_answer_outlined),
+                _suggestionCard("Alternatives for Penicillin allergy", Icons.tune_outlined),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _suggestionCard(String text) {
-    return GestureDetector(
-      onTap: () {
-        ref.read(chatControllerProvider.notifier).sendMessage(text);
-      },
-      child: GlassmorphicContainer(
-        width: 300,
-        height: 80,
-        borderRadius: 16,
-        blur: 20,
-        alignment: Alignment.center,
-        border: 1,
-        linearGradient: LinearGradient(
-            colors: [Colors.white.withOpacity(0.1), Colors.white.withOpacity(0.05)]),
-        borderGradient: LinearGradient(
-            colors: [Colors.white.withOpacity(0.5), Colors.white.withOpacity(0.2)]),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-               Expanded(child: Text(text, style: const TextStyle(color: Colors.white))),
-               const Icon(Icons.arrow_forward, color: Colors.white54)
-            ],
-          ),
+  Widget _suggestionCard(String text, IconData icon) {
+    return InkWell(
+      onTap: () => ref.read(chatControllerProvider.notifier).sendMessage(text),
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        width: 250,
+        height: 180,
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF9F9FB),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.black.withOpacity(0.01)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(text, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87)),
+            const Spacer(),
+            Icon(icon, color: Colors.black38, size: 20),
+          ],
         ),
       ),
     );
@@ -196,25 +217,23 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   Widget _buildMessageBubble(ChatMessage message) {
     final isUser = message.isUser;
-    
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        margin: const EdgeInsets.only(bottom: 24),
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.6),
         decoration: BoxDecoration(
-          color: isUser ? const Color(0xFF6C63FF) : const Color(0xFF2D2F45),
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(20),
-            topRight: const Radius.circular(20),
-            bottomLeft: isUser ? const Radius.circular(20) : Radius.zero,
-            bottomRight: isUser ? Radius.zero : const Radius.circular(20),
-          ),
+          color: isUser ? const Color(0xFF6C63FF) : const Color(0xFFF5F6F8),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
           message.content,
-          style: const TextStyle(color: Colors.white, fontSize: 16, height: 1.5),
+          style: TextStyle(
+            color: isUser ? Colors.white : Colors.black87,
+            fontSize: 16,
+            height: 1.5,
+          ),
         ),
       ),
     );
@@ -222,54 +241,73 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   Widget _buildInputArea(WidgetRef ref) {
     return Container(
-      padding: const EdgeInsets.all(24),
-      child: GlassmorphicContainer(
-        width: double.infinity,
-        height: 80,
-        borderRadius: 40,
-        blur: 20,
-        alignment: Alignment.center,
-        border: 1,
-        linearGradient: LinearGradient(
-            colors: [Colors.white.withOpacity(0.05), Colors.white.withOpacity(0.01)]),
-        borderGradient: LinearGradient(
-            colors: [Colors.white.withOpacity(0.2), Colors.white.withOpacity(0.1)]),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _textController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                    hintText: 'Type your message...',
-                    border: InputBorder.none,
-                    filled: false,
-                  ),
-                  onSubmitted: (val) => _sendMessage(ref),
-                ),
+      padding: const EdgeInsets.fromLTRB(40, 0, 40, 40),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.black.withOpacity(0.05)),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 20, offset: const Offset(0, 10))
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+             TextField(
+              controller: _textController,
+              decoration: const InputDecoration(
+                hintText: "Ask whatever you want....",
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                hintStyle: TextStyle(color: Colors.black26),
               ),
-              IconButton(
-                onPressed: () => _sendMessage(ref),
-                icon: const CircleAvatar(
-                  backgroundColor: Color(0xFF6C63FF),
-                  child: Icon(Icons.send_rounded, color: Colors.white),
-                ),
-              )
-            ],
-          ),
+              onSubmitted: (val) => _sendMessage(ref),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _inputAction(Icons.add_circle_outline, "Add Attachment"),
+                const SizedBox(width: 20),
+                _inputAction(Icons.image_outlined, "Use Image"),
+                const Spacer(),
+                const Text("0/1000", style: TextStyle(color: Colors.black26, fontSize: 12)),
+                const SizedBox(width: 16),
+                GestureDetector(
+                  onTap: () => _sendMessage(ref),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF6C63FF),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+                  ),
+                )
+              ],
+            )
+          ],
         ),
       ),
     );
   }
 
+  Widget _inputAction(IconData icon, String label) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: Colors.black38),
+        const SizedBox(width: 8),
+        Text(label, style: const TextStyle(color: Colors.black38, fontSize: 13, fontWeight: FontWeight.w500)),
+      ],
+    );
+  }
+
   void _sendMessage(WidgetRef ref) {
-     final text = _textController.text;
-      if (text.isNotEmpty) {
-        ref.read(chatControllerProvider.notifier).sendMessage(text);
-        _textController.clear();
-      }
+    if (_textController.text.trim().isEmpty) return;
+    ref.read(chatControllerProvider.notifier).sendMessage(_textController.text);
+    _textController.clear();
   }
 }
 
