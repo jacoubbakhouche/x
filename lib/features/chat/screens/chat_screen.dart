@@ -113,7 +113,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           _sidebarIcon(Icons.settings_outlined),
           const CircleAvatar(
             radius: 18,
-            backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=11"),
+            backgroundColor: Color(0xFF6C63FF),
+            child: Icon(Icons.person, color: Colors.white, size: 20),
           ),
         ],
       ),
@@ -132,12 +133,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   Widget _buildHeader(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       child: Row(
         children: [
-          const Text(
-            "AI Consultation", 
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)
+          const Flexible(
+            child: Text(
+              "AI Consultation", 
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           const Spacer(),
           IconButton(
@@ -150,42 +154,51 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          RichText(
-            textAlign: TextAlign.center,
-            text: const TextSpan(
-              style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold, color: Colors.black),
-              children: [
-                TextSpan(text: "Hi there, "),
-                TextSpan(text: "Doctor\n", style: TextStyle(color: Color(0xFF6C63FF))),
-                TextSpan(text: "What would like to know?"),
-              ]
+    return SingleChildScrollView(
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: RichText(
+                textAlign: TextAlign.center,
+                text: const TextSpan(
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.black),
+                  children: [
+                    TextSpan(text: "Hi there, "),
+                    TextSpan(text: "Doctor\n", style: TextStyle(color: Color(0xFF6C63FF))),
+                    TextSpan(text: "What would like to know?"),
+                  ]
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            "Use one of the most common prompts below or use your own to begin",
-            style: TextStyle(color: Colors.black38, fontSize: 16),
-          ),
-          const SizedBox(height: 48),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: Wrap(
-              spacing: 20,
-              runSpacing: 20,
-              alignment: WrapAlignment.center,
-              children: [
-                _suggestionCard("Check antibiotic dosage for pediatric patient", Icons.person_outline),
-                _suggestionCard("Analyze symptoms for potential abscess", Icons.medical_services_outlined),
-                _suggestionCard("Pulpite guidelines for antibiotics", Icons.question_answer_outlined),
-                _suggestionCard("Alternatives for Penicillin allergy", Icons.tune_outlined),
-              ],
+            const SizedBox(height: 16),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 40),
+              child: Text(
+                "Use one of the most common prompts below or use your own to begin",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.black38, fontSize: 14),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 48),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Wrap(
+                spacing: 16,
+                runSpacing: 16,
+                alignment: WrapAlignment.center,
+                children: [
+                  _suggestionCard("Check antibiotic dosage for pediatric patient", Icons.person_outline),
+                  _suggestionCard("Analyze symptoms for potential abscess", Icons.medical_services_outlined),
+                  _suggestionCard("Pulpite guidelines for antibiotics", Icons.question_answer_outlined),
+                  _suggestionCard("Alternatives for Penicillin allergy", Icons.tune_outlined),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -195,9 +208,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       onTap: () => ref.read(chatControllerProvider.notifier).sendMessage(text),
       borderRadius: BorderRadius.circular(24),
       child: Container(
-        width: 250,
-        height: 180,
-        padding: const EdgeInsets.all(24),
+        width: 220,
+        height: 150,
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: const Color(0xFFF9F9FB),
           borderRadius: BorderRadius.circular(24),
@@ -206,8 +219,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(text, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87)),
-            const Spacer(),
+            Expanded(
+              child: Text(
+                text, 
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             Icon(icon, color: Colors.black38, size: 20),
           ],
         ),
